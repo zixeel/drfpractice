@@ -1,5 +1,8 @@
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
+from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 
 from vehicle.models import Car, Moto, Milage
 from vehicle.serializers import CarSerializer, MotoSerializer, MilageSerializer, MotoMilageSerializer, \
@@ -13,6 +16,12 @@ class CarViewSet(viewsets.ModelViewSet):
 
 class MotoCreateAPIView(generics.CreateAPIView):
     serializer_class = MotoCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        new_moto = serializer.save()
+        new_moto.owner = self.request.user
+        new_moto.save()
 
 
 class MotoListAPIView(generics.ListAPIView):
@@ -38,6 +47,8 @@ class MilageCreateAPIView(generics.CreateAPIView):
     serializer_class = MilageSerializer
 
 
+
+
 class MotoMilageListAPIView(generics.ListAPIView):
     serializer_class = MotoMilageSerializer
     queryset = Milage.objects.filter(moto__isnull=False)
@@ -46,7 +57,9 @@ class MotoMilageListAPIView(generics.ListAPIView):
 class MilageListAPIView(generics.ListAPIView):
     serializer_class = MilageSerializer
     queryset = Milage.objects.all()
-
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ('car', 'moto')
+    ordering_fields = ('year',)
 
 #
 #
