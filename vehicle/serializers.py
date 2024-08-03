@@ -25,7 +25,7 @@ class MotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Moto
         fields = '__all__'
-        validators = [TitleValidator(fields='title'),
+        validators = [TitleValidator(field='title'),
                       serializers.UniqueTogetherValidator(fields=['title','year'],queryset=Moto.objects.all())
                       ]
 
